@@ -1,0 +1,2 @@
+# HumanActivityRecognization
+HumanActivityRecognization using HMM
