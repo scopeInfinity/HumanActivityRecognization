@@ -6,8 +6,9 @@ import numpy as np
 import glob,random
 import sys
 import argparse
+import os
 
-allowedclass = ["running","handclapping","jogging","walking"]#,"boxing","handwaving"
+allowedclass = ["running","handclapping","walking"]#,"boxing","handwaving","jogging",
 
 # #data set
 # # http://www.nada.kth.se/cvap/actions/
@@ -25,7 +26,7 @@ def train():
 		fclass[c]= []
 		clength[c] = []
 		countdata[c] = 0
-		model[c] = hmm.GaussianHMM(10, "full")
+		model[c] = hmm.GaussianHMM(3, "full")
 
 	for line in lines:
 		tok =  line.split()
@@ -37,7 +38,7 @@ def train():
 				continue
 
 			print "Fname : %s \t Class : %s " % (fname,c)
-			if countdata[c]>=1:
+			if countdata[c]>=8:
 				continue
 			countdata[c] += 1
 			frames = tok[2:]
@@ -120,15 +121,37 @@ def test(name):
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
-	parser.add_argument("mode",choices=["train","test"])
+	parser.add_argument("mode",choices=["train","test","states"])
 	args = parser.parse_args()
-	if args.mode == "train":
+	if args.mode == "states":
+		print "Displaying Saved Models"
+		for c in allowedclass:
+			fn = "model/model_"+c+".pkl"
+			if os.path.exists(fn):
+				m = joblib.load(fn)
+			print "For class %s " % c
+			print ""
+			print "Start Probability"
+			print m.startprob_
+			print ""
+			print "Transition Probability"
+			print m.transmat_
+			print ""
+			#print "Covars"
+			#print m.covars_
+			#print ""
+			#print "Means"
+			#print m.means_
+			print "*" * 50
+
+
+	elif args.mode == "train":
 		train()
 	else:
 		fnames = []
-		testCountPerClass = 1
+		testCountPerClass = 2
 		for c in allowedclass:
-			X=glob.glob("videos/person*_%s_*"%c)
+			X=glob.glob("videos/person01*_%s_*"%c)
 			random.shuffle(X)
 			fnames.extend(X[:testCountPerClass])
 		print "Testing for ...."
